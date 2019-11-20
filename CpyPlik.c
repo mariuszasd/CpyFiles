@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#define MAX 47
+#define L_BYTE 1
 
 int main(int argc, char* argv[]){
-	char* buf;
+
+	char buf;
 	int desc_zrod, desc_cel;
-	int lbajt;
-	int  rozm;
+	int odczytane_bajt;
 
 	if (argc<3){
 		fprintf(stderr, "Za malo argumentow. Uzyj: \n");
@@ -20,32 +20,21 @@ int main(int argc, char* argv[]){
 		perror("Blad otwarcia pliku zrodlowego");
 		exit(1);
 	}
-
-	rozm = lseek(desc_zrod, 0, SEEK_END);
-	if (rozm == -1){
-		perror("Blad lseek");
-		exit(1);
-	}
-
-	lseek(desc_zrod, 0, SEEK_SET);
         
 	desc_cel = creat(argv[2], 0640);
 	if (desc_cel == -1){
 		perror("Blad otwarcia pliku docelowego.");
 		exit(1);
 	}
-	
-	buf = (char*) malloc(rozm);
-	printf("Rozmiar pliku  zrodlowego : %ld \n", rozm);
-
-	while ((lbajt = read(desc_zrod, buf, rozm)) > 0){
-		if (write(desc_cel, buf, lbajt) == -1){
+		
+	while ((odczytane_bajt = read(desc_zrod, &buf, L_BYTE)) != 0){
+		if (write(desc_cel, &buf, odczytane_bajt) == -1){
 			perror("Blad zapisu pliku docelowego.");
 			exit(1);
 		}
 	}
-	
-	if (lbajt == -1){
+
+	if (odczytane_bajt == -1){
 		perror("Blad odczytu pliku zrodlowego.");
 		exit(1);
 	}
@@ -54,6 +43,6 @@ int main(int argc, char* argv[]){
 		perror("Blad zamkniecia pliku.");
 		exit(1);
 	}
-	free(buf);
+
 	exit(1);
 }
